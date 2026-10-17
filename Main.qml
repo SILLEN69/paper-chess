@@ -2,9 +2,10 @@ pragma ComponentBehavior: Bound
 import QtQuick
 Rectangle {
  id:root; anchors.fill:parent; z:100000; color:"white";focus:true
+ rotation:state.rotated?180:0
  property real u:Math.min(width/1404,height/1872)
  property real boardSize:Math.min(width-120*u,height-600*u)
- property var state:({board:[],moves:[],legal:[],last:[],hint:[],guide:true,level:1,human:"w",mode:"computer",lesson:-1})
+ property var state:({board:[],moves:[],legal:[],last:[],hint:[],guide:true,level:1,human:"w",mode:"computer",lesson:-1,rotated:false})
  property string modal:""
  property string newMode:"computer"
  property int newLevel:1
@@ -73,7 +74,7 @@ Rectangle {
   ActionButton{width:(board.width-54*root.u)/4;label:root.connectionError?"Retry":root.state.lesson>=0?"Try again":"Undo";onClicked:{if(root.connectionError)root.request("/api/state");else root.act("undo")}}
   ActionButton{width:(board.width-54*root.u)/4;label:root.state.busy?"Thinking…":"Hint";onClicked:root.act("hint")}
   ActionButton{width:(board.width-54*root.u)/4;label:root.state.lesson>=0?"Lessons":"Learn";onClicked:root.modal="lessons"}
-  ActionButton{width:(board.width-54*root.u)/4;label:root.state.lesson>=0?(root.state.lesson<8?"Next lesson":"Play a game"):"Flip board";onClicked:{if(root.state.lesson>=0){if(root.state.lesson<8)root.act("lesson",{index:root.state.lesson+1});else root.act("resume")}else root.act("flip")}}
+  ActionButton{width:(board.width-54*root.u)/4;label:root.state.lesson>=0?(root.state.lesson<8?"Next lesson":"Play a game"):"Flip screen";onClicked:{if(root.state.lesson>=0){if(root.state.lesson<8)root.act("lesson",{index:root.state.lesson+1});else root.act("resume")}else root.act("flip")}}
  }
  Rectangle{
   anchors.fill:parent;z:1000;visible:root.modal!==""||root.state.promotion===true;color:Qt.rgba(1,1,1,.91)
@@ -91,7 +92,7 @@ Rectangle {
     }
     Text{x:55*root.u;y:355*root.u;text:root.newMode==="computer"?"CHOOSE YOUR PACE":"PLAY ACROSS THE TABLE";font.pixelSize:25*root.u;font.letterSpacing:2*root.u;color:"#555555"}
     Row{x:55*root.u;y:405*root.u;spacing:20*root.u;visible:root.newMode==="computer";Repeater{model:3;ActionButton{required property int index;width:320*root.u;label:root.levelNames[index+1];selected:root.newLevel===index+1;onClicked:root.newLevel=index+1}}}
-    Text{x:55*root.u;y:419*root.u;width:parent.width-110*root.u;visible:root.newMode==="local";text:"Share the board. Use Flip board whenever you want to turn it around.";font.pixelSize:31*root.u;wrapMode:Text.WordWrap;color:"#333333"}
+    Text{x:55*root.u;y:419*root.u;width:parent.width-110*root.u;visible:root.newMode==="local";text:"Share the board. Use Flip screen to turn the whole interface toward the other player.";font.pixelSize:31*root.u;wrapMode:Text.WordWrap;color:"#333333"}
     Text{x:55*root.u;y:555*root.u;text:root.newMode==="computer"?"YOUR PIECES":"READY TO LEARN?";font.pixelSize:25*root.u;font.letterSpacing:2*root.u;color:"#555555"}
     Row{x:55*root.u;y:607*root.u;spacing:20*root.u;visible:root.newMode==="computer"
      ActionButton{width:490*root.u;label:"White · you move first";selected:root.newHuman==="w";onClicked:root.newHuman="w"}

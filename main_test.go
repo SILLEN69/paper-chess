@@ -140,6 +140,46 @@ func TestComputerMovesAndUndoReturnsHumanTurn(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 }
+func TestFlipRotatesScreenAndPreservesGame(t *testing.T) {
+	a := newApp(t.TempDir())
+	if err := a.actionLocked(action{Action: "new", Mode: "local", Level: 1}); err != nil {
+		t.Fatal(err)
+	}
+	move(t, a, "e2", "e4")
+	before := a.game.FEN()
+	if err := a.actionLocked(action{Action: "flip"}); err != nil {
+		t.Fatal(err)
+	}
+	v := a.stateLocked()
+	if !v.Rotated || !v.Flipped || a.game.FEN() != before {
+		t.Fatal("flip must rotate the screen and opponent perspective without changing moves")
+	}
+	b := newApp(a.data)
+	if !b.stateLocked().Rotated || b.game.FEN() != before {
+		t.Fatal("screen orientation or game lost on reopen")
+	}
+	if err := b.actionLocked(action{Action: "flip"}); err != nil {
+		t.Fatal(err)
+	}
+	if b.stateLocked().Rotated || b.stateLocked().Flipped || b.game.FEN() != before {
+		t.Fatal("second flip must restore the screen without changing moves")
+	}
+}
+
+func TestBlackPerspectiveDoesNotRotateScreen(t *testing.T) {
+	a := newApp(t.TempDir())
+	// Existing saves may face Black without having requested a screen rotation.
+	a.saved.Flipped = true
+	a.saved.Mode = "computer"
+	a.saved.Human = "b"
+	a.saveLocked()
+	b := newApp(a.data)
+	v := b.stateLocked()
+	if !v.Flipped || v.Rotated {
+		t.Fatal("Black's board perspective must not turn the controls upside down")
+	}
+}
+
 func TestSaveFileAtomicAndPrivate(t *testing.T) {
 	dir := t.TempDir()
 	for i := 0; i < 3; i++ {

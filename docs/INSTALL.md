@@ -17,10 +17,10 @@ The USB-network address is usually `10.11.99.1` when the tablet is connected by 
 ## One command on the tablet
 
 ```sh
-wget -q -T 60 -O /tmp/paper-chess-install.sh https://raw.githubusercontent.com/SILLEN69/paper-chess/v0.1.2/install-online.sh && sh /tmp/paper-chess-install.sh
+wget -q -T 60 -O /tmp/paper-chess-install.sh https://raw.githubusercontent.com/SILLEN69/paper-chess/v0.2.0/install-online.sh && sh /tmp/paper-chess-install.sh
 ```
 
-The full script downloads before execution. Its release URL and expected SHA256 are pinned to `v0.1.2`. It checks the device/firmware, downloads with HTTPS and retries, verifies the archive, then calls the local installer. It does not use an unverified "latest" archive.
+The full script downloads before execution. Its release URL and expected SHA256 are pinned to `v0.2.0`. It checks the device/firmware, downloads with HTTPS and retries, verifies the archive, then calls the local installer. It does not use an unverified "latest" archive.
 
 The local installer verifies runtime checksums, stages program files on the data partition, saves the previous program/services during setup, and checks that the shortcut service starts. A normal setup failure triggers rollback. This is not protection against power loss or a forcibly killed installer; keep the tablet charged.
 
@@ -30,11 +30,13 @@ Re-running the same command reinstalls that release and preserves saved games in
 
 Triple-press the power button within two seconds. Tap **New game** for computer or local two-player mode. **Learn** has nine beginner lessons. Tap **Notes** to exit; repeating the shortcut will not exit chess.
 
+**Flip screen** rotates the entire interface for a player across the table, including menus and touch controls. Press it again to return. The orientation is saved with the game. Choosing Black against the computer only changes the board perspective.
+
 Reopening waits for the native interface to initialize, usually about 20–30 seconds. Normal auto-sleep applies. Notebook cloud sync pauses while chess is open and resumes in Notes.
 
 ## Offline/manual installation
 
-On a computer, download `paper-chess-remarkable2.tar.gz` and its `.sha256` file from the [v0.1.2 release](https://github.com/SILLEN69/paper-chess/releases/tag/v0.1.2). Copy both to `/home/root/` using your SSH client, then on the tablet:
+On a computer, download `paper-chess-remarkable2.tar.gz` and its `.sha256` file from the [v0.2.0 release](https://github.com/SILLEN69/paper-chess/releases/tag/v0.2.0). Copy both to `/home/root/` using your SSH client, then on the tablet:
 
 ```sh
 cd /home/root

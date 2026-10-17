@@ -27,6 +27,8 @@ flowchart LR
 
 **QtQuick** draws a touch-first monochrome board and controls with original SVG pieces. It avoids animation on e-ink, shows legal moves, and queues quick actions to preserve tap order. Lessons have separate state so experimenting does not overwrite a saved game.
 
+Manual screen orientation is stored separately from board perspective. The Flip screen action turns the whole QML root and selects the opposite board perspective; touch coordinates follow Qt's transform. Existing saves and computer games played as Black keep an upright screen unless manually flipped.
+
 **The C bridge** adapts Inkling's Qt ABI technique. It resolves symbols from the tablet's existing libraries, creates the QML overlay on the GUI thread, and disables input to the underlying native items during chess. It makes no function hooks or notebook-editing calls. It still depends on private native interfaces, so compatibility is deliberately narrow.
 
 **The session controller** switches between the stock service and a separate chess UI service. It uses a lock, explicit readiness, session-owned recovery timers and a bridge shutdown acknowledgement. Only the power listener starts at boot.

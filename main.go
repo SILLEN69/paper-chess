@@ -24,6 +24,7 @@ type saveGame struct {
 	Human   string   `json:"human"`
 	Guide   bool     `json:"guide"`
 	Flipped bool     `json:"flipped"`
+	Rotated bool     `json:"rotated"`
 }
 type squareView struct {
 	Square string `json:"square"`
@@ -39,6 +40,7 @@ type view struct {
 	Human      string       `json:"human"`
 	Guide      bool         `json:"guide"`
 	Flipped    bool         `json:"flipped"`
+	Rotated    bool         `json:"rotated"`
 	Selected   string       `json:"selected"`
 	Legal      []string     `json:"legal"`
 	Last       []string     `json:"last"`
@@ -165,7 +167,7 @@ func (a *app) stateLocked() view {
 	if a.hint == nil {
 		a.hint = []string{}
 	}
-	v := view{Mode: a.saved.Mode, Level: a.saved.Level, Human: a.saved.Human, Guide: a.saved.Guide, Flipped: a.saved.Flipped, Turn: p.Turn().Name(), Selected: a.selected, Hint: a.hint, Message: a.message, Busy: a.busy, Lesson: a.lesson, LessonDone: a.lessonDone, Completed: a.completed, Revision: a.revision, Promotion: len(a.promotion) > 0, Board: []squareView{}, Legal: []string{}, Last: []string{}, Moves: []string{}}
+	v := view{Mode: a.saved.Mode, Level: a.saved.Level, Human: a.saved.Human, Guide: a.saved.Guide, Flipped: a.saved.Flipped, Rotated: a.saved.Rotated, Turn: p.Turn().Name(), Selected: a.selected, Hint: a.hint, Message: a.message, Busy: a.busy, Lesson: a.lesson, LessonDone: a.lessonDone, Completed: a.completed, Revision: a.revision, Promotion: len(a.promotion) > 0, Board: []squareView{}, Legal: []string{}, Last: []string{}, Moves: []string{}}
 	for rank := 7; rank >= 0; rank-- {
 		for file := 0; file < 8; file++ {
 			sq := chess.NewSquare(chess.File(file), chess.Rank(rank))
@@ -485,6 +487,7 @@ func (a *app) actionLocked(cmd action) error {
 		}()
 	case "flip":
 		a.saved.Flipped = !a.saved.Flipped
+		a.saved.Rotated = !a.saved.Rotated
 		a.saveLocked()
 		a.changed()
 	case "guide":

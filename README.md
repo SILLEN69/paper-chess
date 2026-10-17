@@ -46,7 +46,7 @@ Lessons keep their own progress and leave your saved game intact.
 SSH into your tablet as `root`, then paste this one command:
 
 ```sh
-wget -q -T 60 -O /tmp/paper-chess-install.sh https://raw.githubusercontent.com/SILLEN69/paper-chess/v0.1.2/install-online.sh && sh /tmp/paper-chess-install.sh
+wget -q -T 60 -O /tmp/paper-chess-install.sh https://raw.githubusercontent.com/SILLEN69/paper-chess/v0.2.0/install-online.sh && sh /tmp/paper-chess-install.sh
 ```
 
 It downloads the pinned release, verifies its SHA256, installs the files and enables the power-button listener. No compiling or manual extraction. Review [the script](install-online.sh) before running it if you prefer.
@@ -54,6 +54,8 @@ It downloads the pinned release, verifies its SHA256, installs the files and ena
 1. **Triple-press power within two seconds** to open chess.
 2. Tap a piece, then a destination. **New game** chooses computer or local play; **Learn** opens the lessons.
 3. Tap **Notes** to return to your notebooks. A repeated shortcut keeps chess open.
+
+**Flip screen** turns the complete interface toward the other player: controls, headings, menus and pieces. The board keeps the other player's perspective, and a second press returns it. Choosing Black against the computer keeps the controls upright.
 
 Allow roughly **20–30 seconds when reopening** while the native interface initializes. Wake the device first if it is asleep. Normal notebook sync pauses during chess and resumes in Notes.
 
