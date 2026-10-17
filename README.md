@@ -74,6 +74,7 @@ The repaired launcher waits for the native library-loaded event and a minimum st
 - Three immediate Notes-action → power-shortcut reopen cycles passed after the launcher repair, with an unchanged OS boot ID and saved game. Extra shortcuts and stale recovery timers were also checked.
 - Hash comparisons found no changes to 893 existing ink/PDF files during the original device installation and launcher verification.
 - The public installer has isolated checks for unsupported firmware, corrupt downloads, reinstall/save preservation and rollback after a simulated service-start failure.
+- The published `v0.1.2` one-command install was run on the physical tablet. All 21 runtime checksums matched afterward; the saved game, ink/PDF hashes, original writing binary and OS boot ID stayed unchanged.
 
 These checks describe one device and one firmware build. They are not a claim of universal compatibility, crash-free operation or measured battery life. The native bridge relies on private Qt ABI and must be revalidated for future firmware.
 
