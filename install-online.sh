@@ -2,10 +2,10 @@
 # Pinned release bootstrap; download fully before executing this script.
 set -eu
 umask 077
-VERSION=v0.1.1
+VERSION=v0.1.2
 REPOSITORY=SILLEN69/paper-chess
 ARCHIVE=paper-chess-remarkable2.tar.gz
-SHA256=e4dae3e9ba49e1280ff4403d9159fb0d12aeadf33b499341470bf84a6fca843a
+SHA256=4a1dc4f629cd48b58617499db71ab47eda6d4df387f0200827219b3ef2226c72
 fail() { printf '%s\n' "Paper Chess: $*" >&2; exit 1; }
 [ "$(id -u)" = 0 ] || fail 'SSH into the reMarkable as root first.'
 [ "$(uname -m)" = armv7l ] || fail 'Only reMarkable 2 (ARMv7) is supported.'
