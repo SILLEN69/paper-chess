@@ -1,0 +1,10 @@
+/paper-chess
+/chess-ui.so
+/SHA256SUMS
+/dist/
+__pycache__/
+*.pyc
+*.tar.gz
+*.sha256
+*.raw
+*.env

@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.png binary
+*.sh text eol=lf
+session text eol=lf

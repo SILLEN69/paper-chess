@@ -1,0 +1,17 @@
+[Unit]
+Description=Temporary Paper Chess interface
+DefaultDependencies=no
+Conflicts=xochitl.service shutdown.target
+After=xochitl.service home.mount var-lib-uboot.mount dbus.socket
+Before=shutdown.target
+Requires=dbus.socket
+RequiresMountsFor=/home/root/paper-chess
+
+[Service]
+ExecStart=/usr/bin/xochitl
+Environment=LD_PRELOAD=/home/root/paper-chess/chess-ui.so
+Restart=no
+TimeoutStopSec=10
+WatchdogSec=60
+NotifyAccess=all
+ExecStopPost=/home/root/paper-chess/session on-exit

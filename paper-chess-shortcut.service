@@ -1,0 +1,16 @@
+[Unit]
+Description=Paper Chess power-button shortcut
+After=home.mount
+RequiresMountsFor=/home/root/paper-chess
+
+[Service]
+ExecStart=/home/root/paper-chess/paper-chess -watch-buttons
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=full
+PrivateTmp=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

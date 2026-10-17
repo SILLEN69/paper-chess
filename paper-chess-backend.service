@@ -1,0 +1,15 @@
+[Unit]
+Description=Offline Paper Chess game
+After=home.mount
+RequiresMountsFor=/home/root/paper-chess
+
+[Service]
+ExecStart=/home/root/paper-chess/paper-chess -tablet
+Restart=no
+NoNewPrivileges=yes
+ProtectSystem=full
+PrivateTmp=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

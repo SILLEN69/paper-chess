@@ -1,0 +1,133 @@
+#!/bin/sh
+# A manually started chess UI service; the stock writing service is untouched.
+set -eu
+BASE=/home/root/paper-chess
+STATE=/run/paper-chess
+UI=paper-chess-ui.service
+loaded() { [ -f "$STATE/session-id" ] || systemctl is-active --quiet "$UI"; }
+ready() { [ -f "$STATE/ui-ready" ] && systemctl is-active --quiet "$UI"; }
+wait_initialized() {
+    target=$1
+    invocation=$(systemctl show "$target" -p InvocationID --value)
+    started=$(systemctl show "$target" -p ExecMainStartTimestampMonotonic --value)
+    tries=0
+    while [ "$tries" -lt 60 ]; do
+        systemctl is-active --quiet "$target" || return 1
+        now=$("$BASE/paper-chess" -monotonic-micros)
+        age=$(( (now-started)/1000000 ))
+        # A short CPU-idle gap occurs during native startup; it is NOT readiness.
+        if [ "$age" -ge 15 ] && journalctl -b "_SYSTEMD_INVOCATION_ID=$invocation" --no-pager | grep -q 'rm.library.loader.*loaded in'; then
+            return 0
+        fi
+        tries=$((tries+1)); sleep 0.5
+    done
+    echo "Interface is still initializing: $target"
+    return 1
+}
+
+# ExecStopPost runs while a control command may hold the lock. It must not wait
+# for that lock or schedule recovery for an intentional, coordinated stop.
+if [ "${1:-}" = on-exit ]; then
+    if [ "${SERVICE_RESULT:-success}" != success ] && [ ! -e "$STATE/stopping" ]; then
+        id=$(cat "$STATE/session-id" 2>/dev/null || true)
+        if [ -n "$id" ]; then
+            systemd-run --quiet --collect --unit="paper-chess-recover-$$" --on-active=1 "$BASE/session" recover "$id"
+        fi
+    fi
+    exit 0
+fi
+mkdir -p "$STATE"
+exec 9>"$STATE/control.lock"
+flock -x 9
+wait_idle() {
+    pid=$(systemctl show xochitl.service -p MainPID --value)
+    [ "$pid" -gt 0 ] || return 0
+    previous=""; quiet=0; polls=0
+    while [ "$polls" -lt 60 ]; do
+        current=$(awk '{total += $14 + $15} END {print total+0}' /proc/"$pid"/task/*/stat 2>/dev/null || true)
+        if [ "$current" = "$previous" ]; then quiet=$((quiet+1)); else quiet=0; fi
+        [ "$quiet" -ge 3 ] && return 0
+        previous=$current; polls=$((polls+1)); sleep 0.1
+    done
+    echo 'The writing interface is busy; leaving it running.'
+    return 1
+}
+restore() {
+    rm -f "$STATE/ui-ready" "$STATE/launch-complete" "$STATE/session-id" "$STATE/stopping" "$STATE/ui-quiesced"
+    systemctl reset-failed "$UI" || true
+    systemctl reset-failed xochitl.service || true
+    systemctl start xochitl.service
+}
+stop_session() {
+    if loaded; then
+        : > "$STATE/stopping"
+        # Wait until the bridge has stopped touching Qt, including queued work.
+        polls=0
+        while [ "$polls" -lt 50 ] && [ ! -e "$STATE/ui-quiesced" ]; do
+            systemctl is-active --quiet "$UI" || break
+            polls=$((polls+1)); sleep 0.1
+        done
+        systemctl stop "$UI" || true
+        restore
+    fi
+    systemctl stop paper-chess-backend.service || true
+}
+# A timer from a previous game must never stop a newly opened game.
+if [ -n "${2:-}" ] && [ "$(cat "$STATE/session-id" 2>/dev/null || true)" != "$2" ]; then
+    echo 'Ignoring a stale chess recovery request.'
+    exit 0
+fi
+case "${1:-}" in
+ stop|recover)
+    stop_session
+    ;;
+ start|toggle)
+    # Legacy "toggle" is intentionally open-only, as is the power shortcut.
+    if loaded && ready && [ -e "$STATE/launch-complete" ]; then echo 'Chess is already open.'; exit 0; fi
+    if loaded; then stop_session; fi
+    [ "$(sed -n 's/REMARKABLE_RELEASE_VERSION=//p' /usr/share/remarkable/update.conf)" = "3.29.0.153" ] || { echo 'Unverified firmware; leaving stock UI'; exit 1; }
+    [ "$(sha256sum /usr/bin/xochitl | cut -d' ' -f1)" = "53547bc30584b9057d5b05ada6c5fb2df3561c3a097c1c2b1aae527d5ddd2e26" ] || { echo 'Writing application changed; leaving stock UI'; exit 1; }
+    wait_initialized xochitl.service || exit 1
+    wait_idle || exit 1
+    rm -f "$STATE/ui-ready" "$STATE/launch-complete" "$STATE/stopping" "$STATE/ui-quiesced"
+    id=$(cat /proc/sys/kernel/random/uuid)
+    printf '%s\n' "$id" > "$STATE/session-id"
+    systemctl start paper-chess-backend.service
+    # Recovery runs independently of SSH and of the modified GUI.
+    systemd-run --quiet --collect --unit="paper-chess-safety-$id" --on-active=35 "$BASE/session" check "$id"
+    # A failure of the custom interface must never inherit the firmware's reboot rule.
+    if [ -n "$(systemctl show "$UI" -p OnFailure --value)" ]; then
+        echo 'Unexpected chess failure handler; leaving stock interface running.'
+        rm -f "$STATE/session-id"
+        systemctl stop paper-chess-backend
+        exit 1
+    fi
+    systemctl stop xochitl.service
+    systemctl reset-failed "$UI" || true
+    if systemctl start "$UI"; then
+        polls=0
+        while [ "$polls" -lt 250 ]; do
+            if ready; then
+                if wait_initialized "$UI"; then
+                    : > "$STATE/launch-complete"
+                    echo "Chess ready: $id"
+                    exit 0
+                fi
+                break
+            fi
+            systemctl is-active --quiet "$UI" || break
+            polls=$((polls+1)); sleep 0.1
+        done
+    fi
+    echo 'Chess did not become ready; restoring notes.'
+    stop_session
+    exit 1
+    ;;
+ check)
+    [ -n "${2:-}" ] || { echo 'Ignoring an unowned chess health check.'; exit 0; }
+    if loaded && ! ready; then
+        stop_session
+    fi
+    ;;
+ *) echo 'Usage: session start|stop|toggle|recover|check'; exit 2;;
+esac

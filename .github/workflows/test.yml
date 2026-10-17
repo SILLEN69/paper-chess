@@ -1,0 +1,21 @@
+name: Tests
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.27.2'
+          cache: false
+      - name: Game and launcher checks
+        run: |
+          go test ./...
+          go vet ./...
+      - name: Installer regression checks
+        run: |
+          sh -n install.sh install-online.sh disable.sh session
+          python3 -m unittest discover -s tests -v
