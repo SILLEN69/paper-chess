@@ -1,3 +1,5 @@
+//go:build ignore
+
 /* MIT. Qt ABI bridge adapted from Inkling, copyright 2026 Nathan Marlor.
  * Runs only in an explicitly launched chess session. No hooks or note mutations.
  */

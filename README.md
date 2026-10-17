@@ -46,7 +46,7 @@ Lessons keep their own progress and leave your saved game intact.
 SSH into your tablet as `root`, then paste this one command:
 
 ```sh
-curl -fL https://raw.githubusercontent.com/SILLEN69/paper-chess/v0.1.0/install-online.sh -o /tmp/paper-chess-install.sh && sh /tmp/paper-chess-install.sh
+wget -q -T 60 -O /tmp/paper-chess-install.sh https://raw.githubusercontent.com/SILLEN69/paper-chess/v0.1.1/install-online.sh && sh /tmp/paper-chess-install.sh
 ```
 
 It downloads the pinned release, verifies its SHA256, installs the files and enables the power-button listener. No compiling or manual extraction. Review [the script](install-online.sh) before running it if you prefer.

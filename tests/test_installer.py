@@ -52,9 +52,9 @@ case "$1" in
    fi;;
 esac
 exit 0''')
-        self.mock('curl', '''[ "${TEST_DOWNLOAD_FAIL:-0}" != 1 ] || exit 22
+        self.mock('wget', '''[ "${TEST_DOWNLOAD_FAIL:-0}" != 1 ] || exit 22
 while [ "$#" -gt 0 ]; do
- if [ "$1" = -o ]; then
+ if [ "$1" = -O ]; then
    shift
    if [ -n "${TEST_DOWNLOAD_FILE:-}" ]; then cp "$TEST_DOWNLOAD_FILE" "$1"; else printf 'wrong archive bytes' > "$1"; fi
    exit 0
